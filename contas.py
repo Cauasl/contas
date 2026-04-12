@@ -2,6 +2,14 @@ import sys
 from datetime import datetime
 import os
 import csv
+import json
+
+def procurarIndexValor(arry=[], val=str):
+    try:
+        res = int(arry.index(val))
+        return arry[res]
+    except ValueError:
+        return '-1'
 
 # nome dos arquivos mês_ano
 # -alteracao //faz a alteraçao no arquivo criado
@@ -22,29 +30,43 @@ if not os.path.isfile(f'meses/{arquivoConta}.csv') and len(args) == 0:
     print('O arquivo não existe ainda, deseja criar outro?')
     res = input('Sim/Não: ')
     if res == 's' or res == 'sim' or res == 'Sim':
-        contaArray = []
-        
+        contaArray = [['Conta', 'Valor', 'total ou parcial']]
+
         #Pergunta e já adiciona o sálario
-        contaArray.append(['Valor recebido', input('Qual o sálario do mês: ')])
+        valorSalario = float(input('Qual o sálario do mês: '))
 
         #Pergunta sobre qual conta quer adicionar e seu valor
         resConta = input('Conta dinheiro: ').split() #[conta, valor, -adm(Comando)]
-
+        valorLiquido = float(resConta[1])
         #Se for apenas um valor ele coloca no arquivo também
         if len(resConta) < 3:
             contaArray.append(resConta)
-        while len(resConta) > 2 and resConta[2] == '-adm': #Loop para adicionar quantos valores quiser
+        while len(resConta) > 2 and procurarIndexValor(resConta, '-adm') == '-adm': #Loop para adicionar quantos valores quiser
+            valorLiquido += float(resConta[1])
             resConta.remove('-adm')
             contaArray.append(resConta)
             resConta = input('Conta dinheiro (lp): ').split()
             if len(resConta) < 3:
                 contaArray.append(resConta)
 
+        print(valorLiquido)
+        valorTotal = valorSalario - valorLiquido
+        contaObj = {
+            "valorSalario": valorSalario,
+            "valorLiquido": valorLiquido,
+            "valorTotal": valorTotal
+        }
+        contaJson = json.dumps(contaObj)
         #Cria o arquivo csv e adiciona os respectivos valores
-        with open(f'meses/{arquivoConta}.csv', 'w') as arqq:
-            for linha in contaArray:
-                linhaCsv = ';'.join(linha)
-                arqq.write(linhaCsv + '\n')
+        if not os.path.exists(f'meses/{arquivoConta}'):
+            os.makedirs(f'meses/{arquivoConta}')
+            with open(f'meses/{arquivoConta}/{arquivoConta}.csv', 'w') as arqq:
+                for linha in contaArray:
+                    linhaCsv = ';'.join(linha)
+                    arqq.write(linhaCsv + '\n')
+            
+            with open(f'meses/{arquivoConta}/{arquivoConta}.json', 'w') as arqJson:
+                arqJson.write(contaJson)
 
 #Lê o arquivo csv do mês
 elif os.path.isfile(f'meses/{arquivoConta}.csv'):
