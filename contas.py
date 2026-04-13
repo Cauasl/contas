@@ -26,11 +26,11 @@ ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
 
 #Verefica se o arquivo com a data atual existe, se não 
-if not os.path.isfile(f'meses/{arquivoConta}.csv') and len(args) == 0:
+if not os.path.isfile(f'meses/{arquivoConta}/contas.json') and len(args) == 0:
     print('O arquivo não existe ainda, deseja criar outro?')
     res = input('Sim/Não: ')
     if res == 's' or res == 'sim' or res == 'Sim':
-        contaArray = [['Conta', 'Valor', 'total ou parcial']]
+        contaArray = []
 
         #Pergunta e já adiciona o sálario
         valorSalario = float(input('Qual o sálario do mês: '))
@@ -42,30 +42,33 @@ if not os.path.isfile(f'meses/{arquivoConta}.csv') and len(args) == 0:
         if len(resConta) < 3:
             contaArray.append(resConta)
         while len(resConta) > 2 and procurarIndexValor(resConta, '-adm') == '-adm': #Loop para adicionar quantos valores quiser
-            valorLiquido += float(resConta[1])
             resConta.remove('-adm')
             contaArray.append(resConta)
             resConta = input('Conta dinheiro (lp): ').split()
-            if len(resConta) < 3:
+            valorLiquido += float(resConta[1])
+            if procurarIndexValor(resConta, '-adm') == '-1':
                 contaArray.append(resConta)
 
         print(valorLiquido)
         valorTotal = valorSalario - valorLiquido
-        contaObj = {
+        contaObj = [{
             "valorSalario": valorSalario,
             "valorLiquido": valorLiquido,
             "valorTotal": valorTotal
-        }
-        contaJson = json.dumps(contaObj)
+        }]
         #Cria o arquivo csv e adiciona os respectivos valores
         if not os.path.exists(f'meses/{arquivoConta}'):
             os.makedirs(f'meses/{arquivoConta}')
-            with open(f'meses/{arquivoConta}/{arquivoConta}.csv', 'w') as arqq:
-                for linha in contaArray:
-                    linhaCsv = ';'.join(linha)
-                    arqq.write(linhaCsv + '\n')
+            print(contaArray)
+            for i in range(0, len(contaArray)):
+                contaObj.append({
+                    "conta": contaArray[i][0],
+                    "valor": float(contaArray[i][1]),
+                    "comando": contaArray[i][2]
+                })
+            contaJson = json.dumps(contaObj, ensure_ascii=False, indent=4)
             
-            with open(f'meses/{arquivoConta}/{arquivoConta}.json', 'w') as arqJson:
+            with open(f'meses/{arquivoConta}/contas.json', 'w') as arqJson:
                 arqJson.write(contaJson)
 
 #Lê o arquivo csv do mês
