@@ -19,14 +19,16 @@ def procurarIndexValor(arry=[], val=str):
 # 
 
 args = sys.argv[1:] # pega o que está escrito depois do arquivo chamado e separa ele em []
+print(args)
 
 noMomento = datetime.now()
 mes = noMomento.month
 ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
+caminho = f'meses/{arquivoConta}'
 
 #Verefica se o arquivo com a data atual existe, se não 
-if not os.path.isfile(f'meses/{arquivoConta}/contas.json') and len(args) == 0:
+if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
     print('O arquivo não existe ainda, deseja criar outro?')
     res = input('Sim/Não: ')
     if res == 's' or res == 'sim' or res == 'Sim':
@@ -49,7 +51,6 @@ if not os.path.isfile(f'meses/{arquivoConta}/contas.json') and len(args) == 0:
             if procurarIndexValor(resConta, '-adm') == '-1':
                 contaArray.append(resConta)
 
-        print(valorLiquido)
         valorTotal = valorSalario - valorLiquido
         contaObj = [{
             "valorSalario": valorSalario,
@@ -57,9 +58,8 @@ if not os.path.isfile(f'meses/{arquivoConta}/contas.json') and len(args) == 0:
             "valorTotal": valorTotal
         }]
         #Cria o arquivo csv e adiciona os respectivos valores
-        if not os.path.exists(f'meses/{arquivoConta}'):
-            os.makedirs(f'meses/{arquivoConta}')
-            print(contaArray)
+        if not os.path.exists(caminho):
+            os.makedirs(caminho)
             for i in range(0, len(contaArray)):
                 contaObj.append({
                     "conta": contaArray[i][0],
@@ -68,8 +68,16 @@ if not os.path.isfile(f'meses/{arquivoConta}/contas.json') and len(args) == 0:
                 })
             contaJson = json.dumps(contaObj, ensure_ascii=False, indent=4)
             
-            with open(f'meses/{arquivoConta}/contas.json', 'w') as arqJson:
+            with open(caminho + '/contas.json', 'w') as arqJson:
                 arqJson.write(contaJson)
+
+            with open(caminho + '/va.json', 'w') as vaJson:
+                vaJson.write(json.dumps({
+                    "VA_total": 300,
+                    "total": 300
+                }, ensure_ascii=False, indent=4))
+
+            print('\n Conta do mês criada! \n')
 
 #Lê o arquivo csv do mês
 elif os.path.isfile(f'meses/{arquivoConta}.csv'):
@@ -81,7 +89,15 @@ elif os.path.isfile(f'meses/{arquivoConta}.csv'):
 
 
 
-
-# match args:
-#     case '-alteracao':
-        
+if len(args) == 1:
+    match args[0]:
+        case '-status':
+            with open(caminho + '/contas.json', 'r', encoding='utf-8') as arq:
+                json_carregado = json.load(arq)
+                print(json_carregado[0]['valorSalario'])
+                print('=============')
+                for i in range(1, len(json_carregado)):
+                    print(f'{json_carregado[i]['valor']} - {json_carregado[i]['conta']}')
+                print(f'============= Total: {json_carregado[0]['valorLiquido']}')
+                print('Pagas: \n')
+                print(f'============= Total gasto: {json_carregado[0]['valorLiquido']}')
