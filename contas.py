@@ -1,7 +1,6 @@
 import sys
 from datetime import datetime
 import os
-import csv
 import json
 
 def procurarIndexValor(arry=[], val=str):
@@ -15,11 +14,14 @@ def procurarIndexValor(arry=[], val=str):
 # -alteracao //faz a alteraçao no arquivo criado
 
 #ADICIONAR/COLOCAR CONTA
-# conta dinheiro -adm (adicionar mais contas)
+# conta dinheiro -ad (adicionar mais contas)
 # 
+#
+#PAGAR CONTA
+# contas.py -p (pagar) conta (se for -pc)
+# contas.py -p conta valor (se for -pp)
 
 args = sys.argv[1:] # pega o que está escrito depois do arquivo chamado e separa ele em []
-print(args)
 
 noMomento = datetime.now()
 mes = noMomento.month
@@ -43,7 +45,7 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
         #Se for apenas um valor ele coloca no arquivo também
         if len(resConta) < 3:
             contaArray.append(resConta)
-        while len(resConta) > 2 and procurarIndexValor(resConta, '-adm') == '-adm': #Loop para adicionar quantos valores quiser
+        while len(resConta) > 2 and procurarIndexValor(resConta, '-ad') == '-ad': #Loop para adicionar quantos valores quiser
             resConta.remove('-adm')
             contaArray.append(resConta)
             resConta = input('Conta dinheiro (lp): ').split()
@@ -55,7 +57,7 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
         contaObj = [{
             "valorSalario": valorSalario,
             "valorLiquido": valorLiquido,
-            "valorTotal": valorTotal
+            "valorLiquidoTotal": valorLiquido
         }]
         #Cria o arquivo csv e adiciona os respectivos valores
         if not os.path.exists(caminho):
@@ -64,7 +66,8 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
                 contaObj.append({
                     "conta": contaArray[i][0],
                     "valor": float(contaArray[i][1]),
-                    "comando": contaArray[i][2]
+                    "comando": contaArray[i][2],
+                    "status": 'nao_paga'
                 })
             contaJson = json.dumps(contaObj, ensure_ascii=False, indent=4)
             
@@ -89,15 +92,25 @@ elif os.path.isfile(f'meses/{arquivoConta}.csv'):
 
 
 
-if len(args) == 1:
-    match args[0]:
-        case '-status':
-            with open(caminho + '/contas.json', 'r', encoding='utf-8') as arq:
-                json_carregado = json.load(arq)
-                print(json_carregado[0]['valorSalario'])
-                print('=============')
-                for i in range(1, len(json_carregado)):
-                    print(f'{json_carregado[i]['valor']} - {json_carregado[i]['conta']}')
-                print(f'============= Total: {json_carregado[0]['valorLiquido']}')
-                print('Pagas: \n')
-                print(f'============= Total gasto: {json_carregado[0]['valorLiquido']}')
+for i in range(0, len(args)):
+  with open(caminho + '/contas.json', 'r', encoding='utf-8') as arq:
+    json_carregado = json.load(arq)
+    match args[i]:
+      case '-status':
+        print(json_carregado[0]['valorSalario'])
+        print('=============')
+        for j in range(1, len(json_carregado)):
+          print(f'{json_carregado[j]['valor']} - {json_carregado[j]['conta']}')
+        print(f'============= Total: {json_carregado[0]['valorLiquido']}')
+        print('Pagas: \n')
+        print(f'============= Total gasto: {json_carregado[0]['valorLiquidoTotal']}')
+      
+      case '-v':
+        contaSelecionada = args[i+1]
+        for l in range(1, len(json_carregado)):
+          if contaSelecionada == json_carregado[l]['conta']:
+            statusConta = ''
+            if json_carregado[l]['status'] == 'nao_paga':
+              statusConta = 'não paga'
+              
+            print(json_carregado[l]['conta'] + f', R${json_carregado[l]['valor']} status: {statusConta}')
