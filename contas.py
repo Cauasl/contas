@@ -28,6 +28,7 @@ mes = noMomento.month
 ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
 caminho = f'meses/{arquivoConta}'
+contasPagas = []
 
 #Verefica se o arquivo com a data atual existe, se não 
 if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
@@ -100,9 +101,14 @@ for i in range(0, len(args)):
         print(json_carregado[0]['valorSalario'])
         print('=============')
         for j in range(1, len(json_carregado)):
+          if json_carregado[j]['status'] == 'paga':
+            contasPagas.append(json_carregado[j]['conta'])
           print(f'{json_carregado[j]['valor']} - {json_carregado[j]['conta']}')
         print(f'============= Total: {json_carregado[0]['valorLiquido']}')
         print('Pagas: \n')
+        if len(contasPagas) > 0:
+          for a in range(0, len(contasPagas)):
+            print(contasPagas[a])
         print(f'============= Total gasto: {json_carregado[0]['valorLiquidoTotal']}')
       
       case '-v':
@@ -112,5 +118,6 @@ for i in range(0, len(args)):
             statusConta = ''
             if json_carregado[l]['status'] == 'nao_paga':
               statusConta = 'não paga'
-              
+            else: 
+              statusConta = 'paga'
             print(json_carregado[l]['conta'] + f', R${json_carregado[l]['valor']} status: {statusConta}')
