@@ -49,18 +49,18 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
         valorSalario = float(input('Qual o sálario do mês: '))
 
         #Pergunta sobre qual conta quer adicionar e seu valor
-        resConta = input('Conta dinheiro: ').split() #[conta, valor, -adm(Comando)]
+        resConta = input('Conta dinheiro -tipo: ').split() #[conta, valor, -adm(Comando)]
         valorLiquido = float(resConta[1])
         #Se for apenas um valor ele coloca no arquivo também
-        if len(resConta) < 3:
+        if len(resConta) < 4:
             contaArray.append(resConta)
         while len(resConta) > 2 and procurarIndexValor(resConta, '-ad'): #Loop para adicionar quantos valores quiser
-            resConta.remove('-adm')
-            contaArray.append(resConta)
-            resConta = input('Conta dinheiro (lp): ').split()
-            valorLiquido += float(resConta[1])
-            if procurarIndexValor(resConta, '-adm'):
-                contaArray.append(resConta)
+          resConta.remove('-ad')
+          contaArray.append(resConta)
+          resConta = input('Conta dinheiro -tipo: ').split()
+          valorLiquido += float(resConta[1])
+          if not procurarIndexValor(resConta, '-ad'):
+              contaArray.append(resConta)
 
         valorTotal = valorSalario - valorLiquido
         contaObj = [{
@@ -68,8 +68,8 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
             "valorLiquido": valorLiquido,
             "valorLiquidoTotal": valorLiquido
         }]
-        #Cria o arquivo csv e adiciona os respectivos valores
-        if not os.path.exists(caminho):
+        #Cria o caminho e adiciona os respectivos valores ao arquivo
+        if not os.path.exists(caminho) or not os.path.exists(caminho+'/contas.json'):
             os.makedirs(caminho)
             for i in range(0, len(contaArray)):
                 contaObj.append({
