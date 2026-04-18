@@ -40,7 +40,6 @@ if os.path.isfile(caminho + '/contas.json') and len(args) > 0:
       
       #Se for a conta passada para fazer o desconto
       elif conta == argumento and status != 'paga' and json_carregado[0]['valorLiquidoTotal'] > 0:
-        valorPassado = float(args[1])
         #Se for o pagamento completo
         if cItem['comando'] == '-pc':
           valorAlterado = valorTotal - cItem['valor']
@@ -67,7 +66,7 @@ if os.path.isfile(caminho + '/contas.json') and len(args) > 0:
         break
       
       #Caso a conta já tenha sido paga
-      elif status == 'paga':
+      elif status == 'paga' and conta == argumento:
         print(f'A {conta} já está paga')
 
   #Abre o arquivo e rescreve com as alterações
