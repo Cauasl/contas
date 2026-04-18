@@ -9,6 +9,14 @@ def procurarIndexValor(arry=[], val=str):
         return arry[res]
     except ValueError:
         return '-1'
+        
+def seComando(comd=str):
+  listaComandos = ['-ad', '-pp', '-pc', '-v', '-status']
+  try:
+    if listaComandos.index(comd) >= 0:
+      return True
+  except ValueError:
+    return False
 
 # nome dos arquivos mês_ano
 # -alteracao //faz a alteraçao no arquivo criado
@@ -121,3 +129,16 @@ for i in range(0, len(args)):
             else: 
               statusConta = 'paga'
             print(json_carregado[l]['conta'] + f', R${json_carregado[l]['valor']} status: {statusConta}')
+            
+      case '-ad':
+        # -ad contaParaAdicionar valor comando
+        if seComando(args[i]):
+          json_carregado[0]['valorLiquidoTotal'] = json_carregado[0]['valorLiquidoTotal'] + float(args[i+2])
+          json_carregado.append({
+                      "conta": args[i+1],
+                      "valor": float(args[i+2]),
+                      "comando": args[i+3],
+                      "status": 'nao_paga'
+                  })
+          with open(caminho+'/contas.json', 'w') as arq:
+            arq.write(json.dumps(json_carregado, ensure_ascii=False, indent=4))
