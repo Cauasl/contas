@@ -10,7 +10,7 @@ ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
 caminho = f'meses/{arquivoConta}'
 
-if os.path.isfile(caminho + '/contas.json'):
+if os.path.isfile(caminho + '/contas.json') and len(args) > 0:
   valorAlterado = 0
   json_carregado = []
   conta = ''
@@ -21,39 +21,40 @@ if os.path.isfile(caminho + '/contas.json'):
     json_carregado = json.load(arqq)
     valorTotal = json_carregado[0]['valorLiquidoTotal']
     argumento = args[0]
-    print(args)
     
     #Passa um por um verificando qual é o correto
-    for i in range(1, len(json_carregado)):
-      conta = json_carregado[i]['conta']
-      status = json_carregado[i]['status']
-      valorPassado = 0
+    for ci, cItem in enumerate(json_carregado):
+      if ci == 0: #ci = conta index
+        continue
+      conta = cItem['conta']
+      status = cItem['status']
+      valorPassado = 0 #Variavel de controle
       
       if len(args) > 1 and args[1][0] == '+':
         valorPassado = float(args[1].replace('+', ''))
         if conta == argumento:
           valorAlterado = valorTotal + valorPassado
           json_carregado[0]['valorLiquidoTotal'] = valorAlterado
-          json_carregado[i]['valor'] = json_carregado[i]['valor'] + valorPassado
+          cItem['valor'] = cItem['valor'] + valorPassado 
           print('\nFeito \n')
       
       #Se for a conta passada para fazer o desconto
-      elif conta == argumento and status != 'paga':
-    #    valorPassado = float(args[1])
+      elif conta == argumento and status != 'paga' and json_carregado[0]['valorLiquidoTotal'] > 0:
+        valorPassado = float(args[1])
         #Se for o pagamento completo
-        if json_carregado[i]['comando'] == '-pc':
-          valorAlterado = valorTotal - json_carregado[i]['valor']
-          json_carregado[i]['status'] = 'paga'
+        if cItem['comando'] == '-pc':
+          valorAlterado = valorTotal - cItem['valor']
+          cItem['status'] = 'paga'
           
         #Se for o pagamento parcial
-        elif json_carregado[i]['comando'] == '-pp' and len(args) > 1:
+        elif cItem['comando'] == '-pp' and len(args) > 1:
           
-          calculoPP = json_carregado[i]['valor'] - valorPassado
+          calculoPP = cItem['valor'] - valorPassado
           if calculoPP <= 0:
             print('AVISO: Ultrapassou o limite estipulado da conta!')
-          json_carregado[i]['valor'] = calculoPP
+            cItem['status'] = 'paga'
+          cItem['valor'] = calculoPP
           valorAlterado = valorTotal - float(args[1])
-          json_carregado[i]['status'] = 'paga'
           
         #Se for pagamento parcial e não foi apresentado o valor
         elif len(args) < 2:

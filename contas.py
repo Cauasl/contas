@@ -5,10 +5,10 @@ import json
 
 def procurarIndexValor(arry=[], val=str):
     try:
-        res = int(arry.index(val))
-        return arry[res]
+        if arry.index(val):
+          return True
     except ValueError:
-        return '-1'
+        return False
         
 def seComando(comd=str):
   listaComandos = ['-ad', '-pp', '-pc', '-v', '-status']
@@ -19,15 +19,15 @@ def seComando(comd=str):
     return False
 
 # nome dos arquivos mês_ano
-# -alteracao //faz a alteraçao no arquivo criado
+# -al //faz a alteraçao no arquivo criado
 
 #ADICIONAR/COLOCAR CONTA
 # conta dinheiro -ad (adicionar mais contas)
 # 
 #
 #PAGAR CONTA
-# contas.py -p (pagar) conta (se for -pc)
-# contas.py -p conta valor (se for -pp)
+# contas.py conta (se for -pc)
+# contas.py conta valor (se for -pp)
 
 args = sys.argv[1:] # pega o que está escrito depois do arquivo chamado e separa ele em []
 
@@ -54,12 +54,12 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
         #Se for apenas um valor ele coloca no arquivo também
         if len(resConta) < 3:
             contaArray.append(resConta)
-        while len(resConta) > 2 and procurarIndexValor(resConta, '-ad') == '-ad': #Loop para adicionar quantos valores quiser
+        while len(resConta) > 2 and procurarIndexValor(resConta, '-ad'): #Loop para adicionar quantos valores quiser
             resConta.remove('-adm')
             contaArray.append(resConta)
             resConta = input('Conta dinheiro (lp): ').split()
             valorLiquido += float(resConta[1])
-            if procurarIndexValor(resConta, '-adm') == '-1':
+            if procurarIndexValor(resConta, '-adm'):
                 contaArray.append(resConta)
 
         valorTotal = valorSalario - valorLiquido
@@ -93,51 +93,55 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
 
 #Lê o arquivo csv do mês
 elif os.path.isfile(f'meses/{arquivoConta}.csv'):
-    with open(f'meses/{arquivoConta}.csv', 'r') as arq:
-        csv_lido = csv.reader(arq, delimiter=';')
-        for linha in csv_lido:
-            print(linha)
+  ...
         
 
 
 
-for i in range(0, len(args)):
+for a, argumento in enumerate(args): #Torna possível colocar mais argumentos
   with open(caminho + '/contas.json', 'r', encoding='utf-8') as arq:
     json_carregado = json.load(arq)
-    match args[i]:
+    match argumento:
+       
+      #Mostra uma visão geral das contas
       case '-status':
         print(json_carregado[0]['valorSalario'])
         print('=============')
-        for j in range(1, len(json_carregado)):
-          if json_carregado[j]['status'] == 'paga':
-            contasPagas.append(json_carregado[j]['conta'])
-          print(f'{json_carregado[j]['valor']} - {json_carregado[j]['conta']}')
+        for j, item in enumerate(json_carregado):
+          if j == 0:
+             continue
+          if item['status'] == 'paga':
+            contasPagas.append(item['conta'])
+          print(f'{item['valor']} - {item['conta']}')
+        
         print(f'============= Total: {json_carregado[0]['valorLiquido']}')
         print('Pagas: \n')
         if len(contasPagas) > 0:
-          for a in range(0, len(contasPagas)):
-            print(contasPagas[a])
+          for cpaga in contasPagas:
+            print(cpaga)
         print(f'============= Total gasto: {json_carregado[0]['valorLiquidoTotal']}')
       
+      #Mostra uma conta específica (-v contaEscolhida)
       case '-v':
-        contaSelecionada = args[i+1]
-        for l in range(1, len(json_carregado)):
-          if contaSelecionada == json_carregado[l]['conta']:
+        contaSelecionada = args[a+1]
+        for umaConta in json_carregado:
+          if contaSelecionada == umaConta['conta']:
             statusConta = ''
-            if json_carregado[l]['status'] == 'nao_paga':
+            if umaConta['status'] == 'nao_paga':
               statusConta = 'não paga'
             else: 
               statusConta = 'paga'
-            print(json_carregado[l]['conta'] + f', R${json_carregado[l]['valor']} status: {statusConta}')
-            
+            print(umaConta['conta'] + f', R${umaConta['valor']} status: {statusConta}')
+
+      #Adiciona uma conta para o arquivo do mês            
       case '-ad':
         # -ad contaParaAdicionar valor comando
-        if seComando(args[i]):
+        if seComando(argumento):
           json_carregado[0]['valorLiquidoTotal'] = json_carregado[0]['valorLiquidoTotal'] + float(args[i+2])
           json_carregado.append({
-                      "conta": args[i+1],
-                      "valor": float(args[i+2]),
-                      "comando": args[i+3],
+                      "conta": args[a+1],
+                      "valor": float(args[a+2]),
+                      "comando": args[a+3],
                       "status": 'nao_paga'
                   })
           with open(caminho+'/contas.json', 'w') as arq:
