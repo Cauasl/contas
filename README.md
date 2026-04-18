@@ -1,2 +1,2 @@
 # contas
- Projeto para gerenciamento das contas do mês
+ Projeto para gerenciamento de contas do mês via terminal
