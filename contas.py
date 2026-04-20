@@ -23,7 +23,7 @@ def seComando(comd=str):
 
 #ADICIONAR/COLOCAR CONTA
 # conta dinheiro -ad (adicionar mais contas)
-# 
+# -pgp (pagar proximo mes)
 #
 #PAGAR CONTA
 # contas.py conta (se for -pc)
@@ -105,26 +105,37 @@ for a, argumento in enumerate(args): #Torna possível colocar mais argumentos
        
       #Mostra uma visão geral das contas
       case '-status':
-        print(json_carregado[0]['valorSalario'])
-        print('=============')
-        for j, item in enumerate(json_carregado):
-          if j == 0:
-             continue
-          if item['status'] == 'paga':
-            contasPagas.append(item['conta'])
-          print(f'{item['valor']} - {item['conta']}')
+        arqVisualizado = caminho + '/contas.json'
+        if len(args[a:]) > 1: #Reconfigura para ver outra conta
+          arqVisualizado = f'meses/{args[a:][1]}_2026/contas.json'
         
-        print(f'============= Total: {json_carregado[0]['valorLiquido']}')
-        print('Pagas: \n')
-        if len(contasPagas) > 0:
-          for cpaga in contasPagas:
-            print(cpaga)
-        print(f'============= Total gasto: {json_carregado[0]['valorLiquidoTotal']}')
+        #Abre o arquivo e fez a leitura
+        with open(arqVisualizado, 'r', encoding='utf-8') as arqLido:
+          
+          statusConta = json.load(arqLido)
+          print(statusConta[0]['valorSalario'])
+          print(statusConta[0]['valorSalario'] - statusConta[0]['valorLiquido'])
+          print('=============')
+          for j, item in enumerate(statusConta):
+            if j == 0:
+               continue
+            if item['status'] == 'paga':
+              contasPagas.append(item['conta'])
+            print(f'{item['valor']} - {item['conta']}')
+          
+          print(f'============= Total: {statusConta[0]['valorLiquido']}')
+          print('Pagas: \n')
+          if len(contasPagas) > 0:
+            for cpaga in contasPagas:
+              print(cpaga)
+          print(f'============= Total gasto: {statusConta[0]['valorLiquidoTotal']}')
       
       #Mostra uma conta específica (-v contaEscolhida)
       case '-v':
         contaSelecionada = args[a+1]
-        for umaConta in json_carregado:
+        for uc, umaConta in enumerate(json_carregado):
+          if uc == 0:
+            continue
           if contaSelecionada == umaConta['conta']:
             statusConta = ''
             if umaConta['status'] == 'nao_paga':
@@ -146,3 +157,4 @@ for a, argumento in enumerate(args): #Torna possível colocar mais argumentos
                   })
           with open(caminho+'/contas.json', 'w') as arq:
             arq.write(json.dumps(json_carregado, ensure_ascii=False, indent=4))
+            
