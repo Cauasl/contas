@@ -9,7 +9,7 @@ def procurarIndexValor(arry=[], val=str):
           return True
     except ValueError:
         return False
-        
+
 def seComando(comd=str):
   listaComandos = ['-ad', '-pp', '-pc', '-v', '-status']
   try:
@@ -85,8 +85,9 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
 
             with open(caminho + '/va.json', 'w') as vaJson:
                 vaJson.write(json.dumps({
-                    "VA_total": 300,
-                    "total": 300
+                    "VA_parte1": 300.0,
+                    "VA_parte2": 300.0,
+                    "total": 600.0
                 }, ensure_ascii=False, indent=4))
 
             print('\n Conta do mês criada! \n')
