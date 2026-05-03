@@ -18,6 +18,19 @@ def seComando(comd=str):
   except ValueError:
     return False
 
+def verificacaoEntradaConta(arry=[]):
+  comandos = ['-pp', '-pc']
+  try:
+    print(float(arry[1]))
+    for i in range(0, len(comandos)):
+      if len(arry) > 2 and arry[2] == comandos[i]:
+        return []
+      elif i == len(comandos) - 1:
+          return arry
+  except ValueError:
+    return arry
+
+
 # nome dos arquivos mês_ano
 # -al //faz a alteraçao no arquivo criado
 
@@ -45,22 +58,30 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
     if res == 's' or res == 'sim' or res == 'Sim':
         contaArray = []
 
+
         #Pergunta e já adiciona o sálario
         valorSalario = float(input('Qual o sálario do mês: '))
-
+        valorLiquido = 0 
         #Pergunta sobre qual conta quer adicionar e seu valor
-        resConta = input('Conta dinheiro -tipo: ').split() #[conta, valor, -adm(Comando)]
-        valorLiquido = float(resConta[1])
-        #Se for apenas um valor ele coloca no arquivo também
-        if len(resConta) < 4:
-            contaArray.append(resConta)
-        while len(resConta) > 2 and procurarIndexValor(resConta, '-ad'): #Loop para adicionar quantos valores quiser
-          resConta.remove('-ad')
-          contaArray.append(resConta)
+        resConta = []
+        while not procurarIndexValor(resConta, '-t'): #Loop para adicionar quantos valores quiser // -t termina o loop
           resConta = input('Conta dinheiro -tipo: ').split()
+          resErroInput = verificacaoEntradaConta(resConta) #Caso não compra os requisitos retorna uma arry vazia
+
+          while len(resErroInput) > 0:
+            fraseInput = " ".join(resErroInput)
+            print('Valor não segue o esperado.')
+            resConta = input(fraseInput + ": ").split()
+            for i, item in enumerate(resErroInput):
+              if i < len(resErroInput)-1: #Coloca os valores anteriores ao index com valor errado
+                resConta.insert(i, item)
+            resErroInput = verificacaoEntradaConta(resConta)
+
+          contaArray.append(resConta)
           valorLiquido += float(resConta[1])
-          if not procurarIndexValor(resConta, '-ad'):
+          if procurarIndexValor(resConta, '-t'):
               contaArray.append(resConta)
+
 
         valorTotal = valorSalario - valorLiquido
         contaObj = [{
@@ -86,7 +107,9 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
             with open(caminho + '/va.json', 'w') as vaJson:
                 vaJson.write(json.dumps({
                     "VA_parte1": 300.0,
+                    "histParte1": [],
                     "VA_parte2": 300.0,
+                    "histParte2": [], 
                     "total": 600.0
                 }, ensure_ascii=False, indent=4))
 
