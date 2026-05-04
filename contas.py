@@ -48,7 +48,7 @@ noMomento = datetime.now()
 mes = noMomento.month
 ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
-caminho = f'meses/{arquivoConta}'
+caminho = f'meses/4_2026'
 contasPagas = []
 
 #Verefica se o arquivo com a data atual existe, se não 
@@ -66,12 +66,18 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
         resConta = []
         while not procurarIndexValor(resConta, '-t'): #Loop para adicionar quantos valores quiser // -t termina o loop
           resConta = input('Conta dinheiro -tipo: ').split()
+          if len(resConta) < 2:
+            continue
+          
           resErroInput = verificacaoEntradaConta(resConta) #Caso não compra os requisitos retorna uma arry vazia
 
           while len(resErroInput) > 0:
             fraseInput = " ".join(resErroInput)
             print('Valor não segue o esperado.')
-            resConta = input(fraseInput + ": ").split()
+            resConta = input(f"Conta dinheiro -tipo: {fraseInput} ").split()
+            if len(resConta) == 0:
+              continue
+            
             for i, item in enumerate(resErroInput):
               if i < len(resErroInput)-1: #Coloca os valores anteriores ao index com valor errado
                 resConta.insert(i, item)
@@ -79,8 +85,6 @@ if not os.path.isfile(caminho + '/contas.json') and len(args) == 0:
 
           contaArray.append(resConta)
           valorLiquido += float(resConta[1])
-          if procurarIndexValor(resConta, '-t'):
-              contaArray.append(resConta)
 
 
         valorTotal = valorSalario - valorLiquido
