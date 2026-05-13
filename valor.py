@@ -52,9 +52,13 @@ if os.path.isfile(caminho + '/contas.json') and len(args) > 0:
           if calculoPP <= 0:
             print('AVISO: Ultrapassou o limite estipulado da conta!')
             cItem['status'] = 'paga'
-          cItem['valor'] = calculoPP
+            
+          json_carregado[0]['valor'] = calculoPP
           valorAlterado = valorTotal - float(args[1])
-          
+        
+        print('')
+        print(f'Valor: {json_carregado[0]['valor']}')
+        print(f'Total: {json_carregado[0]['valorLiquidoTotal']}')
         #Se for pagamento parcial e não foi apresentado o valor
         elif len(args) < 2:
           print('Não especificado o valor')

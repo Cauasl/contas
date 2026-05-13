@@ -30,7 +30,6 @@ def verificacaoEntradaConta(arry=[]):
   except ValueError:
     return arry
 
-
 # nome dos arquivos mês_ano
 # -al //faz a alteraçao no arquivo criado
 
@@ -48,7 +47,7 @@ noMomento = datetime.now()
 mes = noMomento.month
 ano = noMomento.year
 arquivoConta = f'{mes}_{ano}'
-caminho = f'meses/4_2026'
+caminho = f'meses/{arquivoConta}'
 contasPagas = []
 
 #Verefica se o arquivo com a data atual existe, se não 
@@ -186,3 +185,5 @@ for a, argumento in enumerate(args): #Torna possível colocar mais argumentos
           with open(caminho+'/contas.json', 'w') as arq:
             arq.write(json.dumps(json_carregado, ensure_ascii=False, indent=4))
             
+      case '-s': #simulação
+        criacaoConta()
